@@ -30,7 +30,7 @@ Skeleton [] skeleton;
 
 KJoint[] joints;
 
-PVector[] jointVec; // スケルトンベクトル.
+PVector ankleLeft, ankleRight; // 足ベクトル.
 
 // float zVal = 300;
 float zVal = 500;
@@ -107,10 +107,17 @@ void draw() {
       stroke(0,255,255);
       drawBody(joints);
 
-      // KinectPV2.JointType_AnkleLeftと床1pointの距離を描画する.
+      // 足ベクトルを取得する.
+      ankleLeft = new PVector(joints[KinectPV2.JointType_AnkleLeft].getX(), joints[KinectPV2.JointType_AnkleLeft].getY(), joints[KinectPV2.JointType_AnkleLeft].getZ());
+      ankleRight = new PVector(joints[KinectPV2.JointType_AnkleRight].getX(), joints[KinectPV2.JointType_AnkleRight].getY(), joints[KinectPV2.JointType_AnkleRight].getZ());
+
+      // KinectPV2.JointType_AnkleLeftと床の距離を描画する.
       stroke(255,0,255);
       strokeWeight(0.01);
-      line(floor[0].x, floor[0].y, floor[0].z, joints[KinectPV2.JointType_AnkleLeft].getX(), joints[KinectPV2.JointType_AnkleLeft].getY(), joints[KinectPV2.JointType_AnkleLeft].getZ());
+      for(int j=0; j<9; j++){
+        line(floor[j].x, floor[j].y, floor[j].z, ankleLeft.x, ankleLeft.y, ankleLeft.z);
+        line(floor[j].x, floor[j].y, floor[j].z, ankleRight.x, ankleRight.y, ankleRight.z);
+      }
 
       // 床の位置を取得する.
       // floorY = joints[KinectPV2.JointType_AnkleRight].getY();
