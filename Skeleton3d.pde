@@ -42,10 +42,10 @@ int floor_count = 0; // ループカウンタ.
 float floorY = -0.7; // 床のy座標.
 float floorR = 0.15; // 床の半径.
  // 床と足の距離.
-float ankle_dist_left = 0.0;
-float ankle_dist_right = 0.0;
-float foot_dist_left = 0.0;
-float foot_dist_right = 0.0;
+float ankle_dist_left = 0.0; // 左足かかと.
+float ankle_dist_right = 0.0; // 右足かかと.
+float foot_dist_left = 0.0; // 左足つまさき.
+float foot_dist_right = 0.0; // 右足つまさき.
 float dist_th = 0.15; // 床と足の当たり判定の閾値.
 int[] floor_state = new int[floor_num]; // 床と足の当たり判定の状態配列.
 float floor_stroke_weight = 10.0; // 床pointの重さ.
@@ -115,8 +115,9 @@ void draw() {
 
       // 足ベクトルを取得する.
       ankleLeft = new PVector(joints[KinectPV2.JointType_AnkleLeft].getX(), joints[KinectPV2.JointType_AnkleLeft].getY(), joints[KinectPV2.JointType_AnkleLeft].getZ());
-      footLeft = new PVector(joints[KinectPV2.JointType_FootLeft].getX(), joints[KinectPV2.JointType_FootLeft].getY(), joints[KinectPV2.JointType_FootLeft].getZ());
       ankleRight = new PVector(joints[KinectPV2.JointType_AnkleRight].getX(), joints[KinectPV2.JointType_AnkleRight].getY(), joints[KinectPV2.JointType_AnkleRight].getZ());
+      footLeft = new PVector(joints[KinectPV2.JointType_FootLeft].getX(), joints[KinectPV2.JointType_FootLeft].getY(), joints[KinectPV2.JointType_FootLeft].getZ());
+      footRight = new PVector(joints[KinectPV2.JointType_FootRight].getX(), joints[KinectPV2.JointType_FootRight].getY(), joints[KinectPV2.JointType_FootRight].getZ());
 
       // 足と床の距離を描画する.
       stroke(255,0,255);
@@ -124,7 +125,9 @@ void draw() {
       for(int j=0; j<floor_num; j++){
         // 足と床の距離を取得する.
         ankle_dist_left = sqrt(sq(ankleLeft.x-floor[j].x)+sq(ankleLeft.z-floor[j].z));
+        ankle_dist_right = sqrt(sq(ankleRight.x-floor[j].x)+sq(ankleRight.z-floor[j].z));
         foot_dist_left = sqrt(sq(footLeft.x-floor[j].x)+sq(footLeft.z-floor[j].z));
+        foot_dist_right = sqrt(sq(footRight.x-floor[j].x)+sq(footRight.z-floor[j].z));
 
         // ankle_dist_left = PVector.dist(floor[0], ankleLeft);
         // ankle_dist_right = PVector.dist(floor[i], ankleRight);
@@ -135,7 +138,7 @@ void draw() {
         // line(floor[j].x, floor[j].y, floor[j].z, ankleRight.x, ankleRight.y, ankleRight.z);
 
         // 足と床の当たり判定.
-        if(ankle_dist_left <= dist_th || foot_dist_left <= dist_th){
+        if(ankle_dist_left <= dist_th || ankle_dist_right <= dist_th || foot_dist_left <= dist_th || foot_dist_right <= dist_th){
           floor_state[j] = 1; // On.
         }
         else{
@@ -151,14 +154,12 @@ void draw() {
 
   for(int i=0; i<floor_num; i++){
     if(floor_state[i] == 0){
-      stroke(255,0,255);
+      stroke(255,0,255); // 床pointの色値.
     }
-
     if(floor_state[i] == 1){ // On.
-      stroke(0,0,255);
+      stroke(0,0,255); // 床pointの色値.
     }
-
-    point(floor[i].x, floor[i].y, floor[i].z); // 床point.
+    point(floor[i].x, floor[i].y, floor[i].z); // 床pointを描画する.
   }
 
   popMatrix();
