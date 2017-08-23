@@ -39,7 +39,7 @@ float rotX = PI;
 int floor_num = 9; // 床の数.
 PVector[] floor = new PVector[floor_num]; // 床ベクトル.
 int floor_count = 0; // ループカウンタ.
-float floorY = -0.7; // 床のy座標.
+float floorY = -1.0; // 床のy座標.
 float floorR = 0.15; // 床の半径.
  // 床と足の距離.
 float ankle_dist_left = 0.0; // 左足かかと.
@@ -166,9 +166,28 @@ void draw() {
 
   // ColorSpace.
   fill(255, 0, 0);
-  textSize(48);
-  text(int(frameRate), 50, 50);
-  for(int i=0;i<floor_num;i++){text(floor_state[i],50,100+i*50);}
+  textSize(28);
+  text("FrameRate: "+int(frameRate), 50, 50); // フレームレートのメタ情報.
+  // 床の状態のメタ情報.
+  for(int y=0; y<3; y++){
+    for(int x=0; x<3; x++){
+      stroke(255, 0, 0);
+      strokeWeight(2);
+      if(floor_state[x+y+(2*y)] == 1){
+        fill(255, 0, 0);
+        rect(50+(50*x), 100+(50*y), 50, 50);
+        fill(0);
+        text((x+y+(2*y)+1), 50+(50*x)+15, 100+(50*y)+35);
+      }
+      else{
+        noFill();
+        rect(50+(50*x), 100+(50*y), 50, 50);
+        fill(255, 0, 0);
+        text((x+y+(2*y)+1), 50+(50*x)+15, 100+(50*y)+35);
+      }
+
+    }
+  }
 }
 
 //use different color for each skeleton tracked
