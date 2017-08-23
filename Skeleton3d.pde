@@ -30,10 +30,10 @@ Skeleton [] skeleton;
 
 KJoint[] joints;
 
-PVector ankleLeft, ankleRight; // 足ベクトル.
+PVector ankleLeft, footLeft, ankleRight; // 足ベクトル.
 
 // float zVal = 300;
-float zVal = 500;
+float zVal = 800;
 float rotX = PI;
 
 PVector[] floor = new PVector[9]; // 床ベクトル.
@@ -41,7 +41,10 @@ int floor_num = 0; // ループカウンタ.
 
 float floorY = -0.7; // 床の位置.
 float floorR = 0.15; // 床の半径.
-float floor_to_ankle_dist = 0.0; // 床と足の距離.
+float ankle_dist_left = 0.0; // 床と足の距離.
+float foot_dist_left = 0.0;
+float ankle_dist_right = 0.0;
+float dist_th = 0.15; // 床と足の衝突判定.
 float floor_stroke_weight = 10.0;
 
 void setup() {
@@ -86,13 +89,6 @@ void draw() {
   scale(zVal);
   rotateX(rotX);
 
-  // 床の位置を描写する.
-  stroke(255,0,255);
-  strokeWeight(10);
-  for(int i=0; i<9; i++){
-    point(floor[i].x, floor[i].y, floor[i].z);
-  }
-
   for (int i = 0; i < skeleton.length; i++) {
     if (skeleton[i].isTracked()) {
       // KJoint[]
@@ -109,26 +105,47 @@ void draw() {
 
       // 足ベクトルを取得する.
       ankleLeft = new PVector(joints[KinectPV2.JointType_AnkleLeft].getX(), joints[KinectPV2.JointType_AnkleLeft].getY(), joints[KinectPV2.JointType_AnkleLeft].getZ());
+      footLeft = new PVector(joints[KinectPV2.JointType_FootLeft].getX(), joints[KinectPV2.JointType_FootLeft].getY(), joints[KinectPV2.JointType_FootLeft].getZ());
       ankleRight = new PVector(joints[KinectPV2.JointType_AnkleRight].getX(), joints[KinectPV2.JointType_AnkleRight].getY(), joints[KinectPV2.JointType_AnkleRight].getZ());
 
-      // KinectPV2.JointType_AnkleLeftと床の距離を描画する.
-      stroke(255,0,255);
+      // 足と床の距離を描画する.
       strokeWeight(0.01);
-      for(int j=0; j<9; j++){
-        line(floor[j].x, floor[j].y, floor[j].z, ankleLeft.x, ankleLeft.y, ankleLeft.z);
-        line(floor[j].x, floor[j].y, floor[j].z, ankleRight.x, ankleRight.y, ankleRight.z);
-      }
+      // for(int j=0; j<9; j++){
+        stroke(255,0,255);
 
-      // 床の位置を取得する.
-      // floorY = joints[KinectPV2.JointType_AnkleRight].getY();
+        // ankle_dist_left = PVector.dist(floor[0], ankleLeft);
+        // ankle_dist_right = PVector.dist(floor[i], ankleRight);
+
+        // 足と床の距離を取得する.
+        ankle_dist_left = sqrt(sq(ankleLeft.x-floor[0].x)+sq(ankleLeft.z-floor[0].z));
+        foot_dist_left = sqrt(sq(footLeft.x-floor[0].x)+sq(footLeft.z-floor[0].z));
+
+        line(floor[0].x, floor[0].y, floor[0].z, ankleLeft.x, ankleLeft.y, ankleLeft.z);
+        line(floor[0].x, floor[0].y, floor[0].z, footLeft.x, footLeft.y, footLeft.z);
+
+        // line(floor[j].x, floor[j].y, floor[j].z, ankleLeft.x, ankleLeft.y, ankleLeft.z);
+        // line(floor[j].x, floor[j].y, floor[j].z, ankleRight.x, ankleRight.y, ankleRight.z);
+      // }
+
     }
+  }
+
+  // 床の位置を描写する.
+  stroke(255,0,255);
+  strokeWeight(10);
+  if(ankle_dist_left <= dist_th || foot_dist_left <= dist_th){
+    stroke(0,0,255);
+  }
+  for(int i=0; i<9; i++){
+    point(floor[i].x, floor[i].y, floor[i].z);
   }
 
   popMatrix();
 
   fill(255, 0, 0);
   textSize(48);
-  text(frameRate, 50, 50);
+  // text(frameRate, 50, 50);
+  text(ankle_dist_left+"\n"+foot_dist_left, 50, 100);
 }
 
 //use different color for each skeleton tracked
