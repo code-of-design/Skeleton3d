@@ -30,18 +30,34 @@ Skeleton [] skeleton;
 
 KJoint[] joints;
 
+PVector[] jointVec; // スケルトンベクトル.
+
 // float zVal = 300;
 float zVal = 500;
 float rotX = PI;
 
+PVector[] floor = new PVector[9]; // 床ベクトル.
+int floor_num = 0; // ループカウンタ.
+
 float floorY = -0.7; // 床の位置.
 float floorR = 0.15; // 床の半径.
+float floor_to_ankle_dist = 0.0; // 床と足の距離.
+float floor_stroke_weight = 10.0;
 
 void setup() {
   size(1024, 768, P3D);
   // size(1920, 1080, P3D); // Kinect color space.
 
-  frameRate(30); // Kinect.
+  frameRate(30); // Kinectフレームレート.
+
+  // 床の位置を初期化する.
+  for(float z=1.3; z<=1.9; z+=0.3){
+    for(float x=-0.45; x<=0.45; x+=0.3){
+        floor[floor_num] = new PVector(x+floorR, floorY, z+floorR);
+        floor_num++;
+    }
+  }
+  println(floor);
 
   kinect = new KinectPV2(this);
 
@@ -70,12 +86,11 @@ void draw() {
   scale(zVal);
   rotateX(rotX);
 
-  // 床プロジェクションマッピングを描写する.
-  stroke(255,0,0);
-  for(float z=1.3; z<=1.9; z+=0.3){
-    for(float x=-0.45; x<=0.45; x+=0.3){
-      point(x+floorR, floorY, z+floorR);
-    }
+  // 床の位置を描写する.
+  stroke(255,0,255);
+  strokeWeight(10);
+  for(int i=0; i<9; i++){
+    point(floor[i].x, floor[i].y, floor[i].z);
   }
 
   for (int i = 0; i < skeleton.length; i++) {
@@ -92,9 +107,16 @@ void draw() {
       stroke(0,255,255);
       drawBody(joints);
 
-      // floorY = joints[KinectPV2.JointType_AnkleRight].getY(); // 床の位置を取得する.
+      // KinectPV2.JointType_AnkleLeftと床1pointの距離を描画する.
+      stroke(255,0,255);
+      strokeWeight(0.01);
+      line(floor[0].x, floor[0].y, floor[0].z, joints[KinectPV2.JointType_AnkleLeft].getX(), joints[KinectPV2.JointType_AnkleLeft].getY(), joints[KinectPV2.JointType_AnkleLeft].getZ());
+
+      // 床の位置を取得する.
+      // floorY = joints[KinectPV2.JointType_AnkleRight].getY();
     }
   }
+
   popMatrix();
 
   fill(255, 0, 0);
@@ -181,9 +203,6 @@ void drawHandState(KJoint joint) {
   handState(joint.getState());
   strokeWeight(5.0f + joint.getZ()*8);
   point(joint.getX(), joint.getY(), joint.getZ());
-
-  // point(-0.5, -0.5, 0.5);
-  // point(0.5, -0.5, 0.5);
 }
 
 void handState(int handState) {
