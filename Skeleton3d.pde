@@ -23,12 +23,15 @@
 
 import KinectPV2.KJoint;
 import KinectPV2.*;
+import processing.net.*; // 通信ライブラリ.
 
 KinectPV2 kinect;
-
 Skeleton [] skeleton;
-
 KJoint[] joints;
+
+Client client; // クライアント.
+// String serverAddress = "localhost";
+String serverAddress = "10.0.2.5"; // サーバのIPアドレス.
 
 PVector ankleLeft, ankleRight, footLeft, footRight; // 足ベクトル.
 
@@ -50,11 +53,15 @@ float dist_th = 0.15; // 床と足の当たり判定の閾値.
 int[] floor_state = new int[floor_num]; // 床と足の当たり判定の状態配列.
 float floor_stroke_weight = 10.0; // 床pointの重さ.
 
+String floor_state_str; // サーバに送信する床の状態文字列.
+
 void setup() {
   size(1024, 768, P3D);
   // size(1920, 1080, P3D); // Kinect color space.
-
   frameRate(30); // Kinectフレームレート.
+
+  // クライアントを初期化する.
+  client = new Client(this, serverAddress, 5555);
 
   // 床の位置を初期化する.
   for(float z=1.3; z<=1.9; z+=0.3){
@@ -163,6 +170,21 @@ void draw() {
   }
 
   popMatrix();
+
+  // サーバに床の状態を送信する.
+  // 床の状態を床の状態文字列に変換する.
+  for(int i=0; i<floor_num; i++){
+    floor_state_str += floor_state[i];
+    floor_state_str += ",";
+  }
+  println(floor_state_str);
+
+  if(floor_state_str.length() >= floor_num){
+    client.write(floor_state_str); // サーバに床の状態を送信する.
+  }
+
+  // 送信情報をリフレッシュする.
+  floor_state_str = "";
 
   // ColorSpace.
   fill(255, 0, 0);
@@ -287,3 +309,19 @@ void handState(int handState) {
     break;
   }
 }
+
+/*
+void clientEvent(Client c){
+  String s = c.readString();
+
+  if(s != null){
+    println("ClientReceived: "+s);
+  }
+}
+
+void mouseClicked( ) {
+  String s = "("+mouseX+","+mouseY+") was clicked";
+  println(s);
+  client.write(s);
+}
+*/
